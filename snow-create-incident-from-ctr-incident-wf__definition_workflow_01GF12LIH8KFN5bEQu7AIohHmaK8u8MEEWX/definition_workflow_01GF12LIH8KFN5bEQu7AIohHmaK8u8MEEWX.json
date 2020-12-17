@@ -1,0 +1,563 @@
+{
+  "workflow": {
+    "unique_name": "definition_workflow_01GF12LIH8KFN5bEQu7AIohHmaK8u8MEEWX",
+    "name": "ServiceNow - Create Incident on CTR Incident",
+    "title": "ServiceNow - Create Incident on CTR Incident",
+    "type": "generic.workflow",
+    "base_type": "workflow",
+    "variables": null,
+    "properties": {
+      "atomic": {
+        "is_atomic": false
+      },
+      "delete_workflow_instance": false,
+      "description": "This workflow looks for Cisco Threat Response new incidents and then creates a ServiceNow incident for any found.\n\nRequired Targets:\n- CTR_For_Access_Token (default)\n- CTR_API (default)\n- ServiceNow\n\nRequired Account Keys:\n- CTR_Credentials\n- ServiceNow\n\nRequired Global Variables:\n- Last Run Timestamp",
+      "display_name": "ServiceNow - Create Incident on CTR Incident",
+      "runtime_user": {
+        "override_target_runtime_user": false,
+        "specify_on_workflow_start": false,
+        "target_default": true
+      },
+      "target": {
+        "execute_on_target_group": true,
+        "target_group": {
+          "target_group_id": "target_group_01EJ0TQWPQWBD0qiWqClJKj9FOzwiZRfOFH",
+          "run_on_all_targets": false,
+          "selected_target_types": [
+            "web-service.endpoint"
+          ],
+          "use_criteria": {
+            "choose_target_using_algorithm": "choose_first_with_matching_criteria",
+            "conditions": [
+              {
+                "operator": "eq",
+                "left_operand": "$targetgroup.web-service endpoint.input.display_name$",
+                "right_operand": "Private_CTIA_Target"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "object_type": "definition_workflow",
+    "actions": [
+      {
+        "unique_name": "definition_activity_01GF13N0KW05B17IKmVMaikwPPjEZFf3jKw",
+        "name": "CTRGenerateAccessToken",
+        "title": "CTRGenerateAccessToken",
+        "type": "workflow.atomic_workflow",
+        "base_type": "subworkflow",
+        "properties": {
+          "continue_on_failure": false,
+          "display_name": "CTRGenerateAccessToken",
+          "runtime_user": {
+            "target_default": true
+          },
+          "skip_execution": false,
+          "target": {
+            "override_workflow_target_group_criteria": true,
+            "target_group": {
+              "run_on_all_targets": false,
+              "use_criteria": {
+                "choose_target_using_algorithm": "choose_first_with_matching_criteria",
+                "conditions": [
+                  {
+                    "left_operand": "$targetgroup.web-service endpoint.input.display_name$",
+                    "operator": "eq",
+                    "right_operand": "CTR_For_Access_Token"
+                  }
+                ]
+              }
+            }
+          },
+          "workflow_id": "definition_workflow_01779LB6MV0P02kvka9TGV5cEam84NrCTy4"
+        },
+        "object_type": "definition_activity"
+      },
+      {
+        "unique_name": "definition_activity_01GF8M5KTU95Y3fDGP2Zvgqd3793pBOThrD",
+        "name": "Execute Python Script",
+        "title": "GET CURRENT TIMESTAMP",
+        "type": "python3.script",
+        "base_type": "activity",
+        "properties": {
+          "action_timeout": 180,
+          "continue_on_failure": false,
+          "display_name": "GET CURRENT TIMESTAMP",
+          "script": "import time\ntimestamp = time.strftime(\"%Y-%m-%dT%H:%M:%S.%SZ\", time.gmtime())",
+          "script_queries": [
+            {
+              "script_query": "timestamp",
+              "script_query_name": "CURRENT_TIMESTAMP",
+              "script_query_type": "string"
+            }
+          ],
+          "skip_execution": false
+        },
+        "object_type": "definition_activity"
+      },
+      {
+        "unique_name": "definition_activity_01GF8U1N97LUB5QIL1LLegDx8VgoDUSSeMG",
+        "name": "Format Date",
+        "title": "FORMAT CURRENT TIMTESTAMP",
+        "type": "core.format_date",
+        "base_type": "activity",
+        "properties": {
+          "continue_on_failure": false,
+          "display_name": "FORMAT CURRENT TIMTESTAMP",
+          "format_string": "2006-01-02T15:04:05.999999999Z",
+          "original_date": "$activity.definition_activity_01GF8M5KTU95Y3fDGP2Zvgqd3793pBOThrD.output.script_queries.CURRENT_TIMESTAMP$",
+          "skip_execution": false,
+          "use_custom_format": false
+        },
+        "object_type": "definition_activity"
+      },
+      {
+        "unique_name": "definition_activity_01GF15O21B5ED6Gb3ocdCp47IYzqkPUpM3k",
+        "name": "HTTP Request",
+        "title": "GET INCIDENTS",
+        "type": "web-service.http_request",
+        "base_type": "activity",
+        "properties": {
+          "accept": "application/json",
+          "action_timeout": 180,
+          "allow_auto_redirect": false,
+          "content_type": "application/json",
+          "continue_on_error_status_code": false,
+          "continue_on_failure": true,
+          "custom_headers": [
+            {
+              "name": "Authorization",
+              "value": "Bearer $activity.definition_activity_01GF13N0KW05B17IKmVMaikwPPjEZFf3jKw.output.variable_workflow_01BNOOXA3G6MV1PGAvsfZOKDdMYcE6XS726$"
+            }
+          ],
+          "description": "Get the incidents sorted by the time opened within the timeframe between the last request and the  current time.",
+          "display_name": "GET INCIDENTS",
+          "method": "GET",
+          "relative_url": "/ctia/incident/search?sort_order=desc\u0026sort_by=incident_time.opened\u0026query=timestamp:[\"$global.variable_01GF8HX6FEB7E1CS6XHyodxpGimJDKt2fSC.global.variable_01GF8HX6FEB7E1CS6XHyodxpGimJDKt2fSC$\" TO \"$activity.definition_activity_01GF8U1N97LUB5QIL1LLegDx8VgoDUSSeMG.output.result$\"]",
+          "runtime_user": {
+            "override_target_runtime_user": false,
+            "target_default": true
+          },
+          "skip_execution": false,
+          "target": {
+            "override_workflow_target_group_criteria": true,
+            "target_group": {
+              "use_criteria": {
+                "choose_target_using_algorithm": "choose_first_with_matching_criteria",
+                "conditions": [
+                  {
+                    "left_operand": "$targetgroup.web-service endpoint.input.display_name$",
+                    "operator": "eq",
+                    "right_operand": "Private_CTIA_Target"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "object_type": "definition_activity"
+      },
+      {
+        "unique_name": "definition_activity_01JMI2894UUEY3tGmIeXzsG1xPocisM3G3m",
+        "name": "Condition Block",
+        "title": "HTTP RESULT IS 200 OK?",
+        "type": "logic.if_else",
+        "base_type": "activity",
+        "properties": {
+          "continue_on_failure": false,
+          "display_name": "HTTP RESULT IS 200 OK?",
+          "skip_execution": false
+        },
+        "object_type": "definition_activity",
+        "blocks": [
+          {
+            "unique_name": "definition_activity_01JMI28S5JXWO3N8ZAfJNkhiEafFg4Ba2OX",
+            "name": "Condition Branch",
+            "title": "NO",
+            "type": "logic.condition_block",
+            "base_type": "activity",
+            "properties": {
+              "condition": {
+                "left_operand": "$activity.definition_activity_01GF15O21B5ED6Gb3ocdCp47IYzqkPUpM3k.output.status_code$",
+                "operator": "ne",
+                "right_operand": 200
+              },
+              "continue_on_failure": false,
+              "display_name": "NO",
+              "skip_execution": false
+            },
+            "object_type": "definition_activity",
+            "actions": [
+              {
+                "unique_name": "definition_activity_01JMI3FHJWN2L37MDhMMWo5l5aHssBfkZYG",
+                "name": "Completed",
+                "title": "Completed",
+                "type": "logic.completed",
+                "base_type": "activity",
+                "properties": {
+                  "completion_type": "failed-completed",
+                  "continue_on_failure": false,
+                  "description": "The API call to CTR failed.",
+                  "display_name": "Completed",
+                  "result_message": "The API call to CTR failed.",
+                  "skip_execution": false
+                },
+                "object_type": "definition_activity"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "unique_name": "definition_activity_01JMI3XWZXKX94K7FYBb2xBqOjsK2JRh59d",
+        "name": "Condition Block",
+        "title": "HAVE NEW INCIDENTS?",
+        "type": "logic.if_else",
+        "base_type": "activity",
+        "properties": {
+          "continue_on_failure": false,
+          "display_name": "HAVE NEW INCIDENTS?",
+          "skip_execution": false
+        },
+        "object_type": "definition_activity",
+        "blocks": [
+          {
+            "unique_name": "definition_activity_01JMI3YAXVEYR6iVmKCNKpRnzuxr9z0jI1a",
+            "name": "Condition Branch",
+            "title": "NO",
+            "type": "logic.condition_block",
+            "base_type": "activity",
+            "properties": {
+              "condition": {
+                "left_operand": "$activity.definition_activity_01GF15O21B5ED6Gb3ocdCp47IYzqkPUpM3k.output.response_body$",
+                "operator": "eq",
+                "right_operand": "[]"
+              },
+              "continue_on_failure": false,
+              "display_name": "NO",
+              "skip_execution": false
+            },
+            "object_type": "definition_activity",
+            "actions": [
+              {
+                "unique_name": "definition_activity_01JMI506PU7B05szMDYo1N1JtVRjuPsZgY3",
+                "name": "Completed",
+                "title": "Completed",
+                "type": "logic.completed",
+                "base_type": "activity",
+                "properties": {
+                  "completion_type": "succeeded",
+                  "continue_on_failure": false,
+                  "description": "No new incidents since the last run.",
+                  "display_name": "Completed",
+                  "result_message": "No new incidents since the last run.",
+                  "skip_execution": false
+                },
+                "object_type": "definition_activity"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "unique_name": "definition_activity_01JL0B818ACYZ1plkUSEFVSPSNcIEbZXOD5",
+        "name": "Set Variables",
+        "title": "UPDATE LAST TIME STAMP",
+        "type": "core.set_multiple_variables",
+        "base_type": "activity",
+        "properties": {
+          "continue_on_failure": false,
+          "description": "Update the timestamp for when the Cisco Threat Response Incidents have been pulled to the current time.",
+          "display_name": "UPDATE LAST TIME STAMP",
+          "skip_execution": false,
+          "variables_to_update": [
+            {
+              "variable_to_update": "$global.variable_01GF8HX6FEB7E1CS6XHyodxpGimJDKt2fSC.global.variable_01GF8HX6FEB7E1CS6XHyodxpGimJDKt2fSC$",
+              "variable_value_new": "$activity.definition_activity_01GF8U1N97LUB5QIL1LLegDx8VgoDUSSeMG.output.result$"
+            }
+          ]
+        },
+        "object_type": "definition_activity"
+      },
+      {
+        "unique_name": "definition_activity_01GFAMN1LI9UR6j1VB4DIb4Jt2grmmSb3Ut",
+        "name": "Read Table from JSON",
+        "title": "Save Incidents to Table",
+        "type": "corejava.read_table_from_json",
+        "base_type": "activity",
+        "properties": {
+          "action_timeout": 180,
+          "continue_on_failure": false,
+          "description": "Save all New Threat Response incidents into a table.",
+          "display_name": "Save Incidents to Table",
+          "input_json": "$activity.definition_activity_01GF15O21B5ED6Gb3ocdCp47IYzqkPUpM3k.output.response_body$",
+          "jsonpath_query": "$[?(@.status=='New')]",
+          "persist_output": true,
+          "populate_columns": false,
+          "skip_execution": false,
+          "table_columns": [
+            {
+              "column_name": "description",
+              "column_type": "string"
+            },
+            {
+              "column_name": "title",
+              "column_type": "string"
+            },
+            {
+              "column_name": "short_description",
+              "column_type": "string"
+            },
+            {
+              "column_name": "source",
+              "column_type": "string"
+            },
+            {
+              "column_name": "id",
+              "column_type": "string"
+            }
+          ]
+        },
+        "object_type": "definition_activity"
+      },
+      {
+        "unique_name": "definition_activity_01GFAUMH08XDR42Z8EukP0mX6w8RF9PppPC",
+        "name": "For Each",
+        "title": "For Each Incident",
+        "type": "logic.for_each",
+        "base_type": "activity",
+        "properties": {
+          "continue_on_failure": false,
+          "display_name": "For Each Incident",
+          "skip_execution": false,
+          "source_array": "$activity.definition_activity_01GFAMN1LI9UR6j1VB4DIb4Jt2grmmSb3Ut.output.read_table_from_json$"
+        },
+        "object_type": "definition_activity",
+        "actions": [
+          {
+            "unique_name": "definition_activity_01JLO6DXLSD6B0qpikHApmzmQChSXvdBl6l",
+            "name": "Execute Python Script",
+            "title": "Convert Line Breaks for SNOW",
+            "type": "python3.script",
+            "base_type": "activity",
+            "properties": {
+              "action_timeout": 180,
+              "continue_on_failure": false,
+              "display_name": "Convert Line Breaks for SNOW",
+              "script": "description = \"\"\"$activity.definition_activity_01GFAUMH08XDR42Z8EukP0mX6w8RF9PppPC.input.source_array[@].description$\"\"\"\nnewstr = description.replace('\\n',\"\u003cbr /\u003e\")",
+              "script_queries": [
+                {
+                  "script_query": "newstr",
+                  "script_query_name": "description",
+                  "script_query_type": "string"
+                }
+              ],
+              "skip_execution": false
+            },
+            "object_type": "definition_activity"
+          },
+          {
+            "unique_name": "definition_activity_01JLPO3YQ0IFK0hnURYYZO4gWok7jTmjPxc",
+            "name": "Execute Python Script",
+            "title": "Convert Line Breaks for WxT",
+            "type": "python3.script",
+            "base_type": "activity",
+            "properties": {
+              "action_timeout": 180,
+              "continue_on_failure": false,
+              "display_name": "Convert Line Breaks for WxT",
+              "script": "description = \"\"\"$activity.definition_activity_01GFAUMH08XDR42Z8EukP0mX6w8RF9PppPC.input.source_array[@].description$\"\"\"\nnewstr = description.replace('\\n',\"  \\\\n\")",
+              "script_queries": [
+                {
+                  "script_query": "newstr",
+                  "script_query_name": "description",
+                  "script_query_type": "string"
+                }
+              ],
+              "skip_execution": false
+            },
+            "object_type": "definition_activity"
+          },
+          {
+            "unique_name": "definition_activity_01JLOMODBJO5R6xTm2AObzzZpt0Ar6efZkX",
+            "name": "Webex Teams - Post Message to Room",
+            "title": "Webex Teams - Post Message to Room",
+            "type": "workflow.atomic_workflow",
+            "base_type": "subworkflow",
+            "properties": {
+              "continue_on_failure": false,
+              "display_name": "Webex Teams - Post Message to Room",
+              "input": {
+                "variable_workflow_01FGYY44G3MZ55amJu9YqgUeKS8GT49bZx3": "$global.variable_01H0BNK7MLU3M6Bcnlz5qZqYbUrp2zVjnTM.global.variable_01H0BNK7MLU3M6Bcnlz5qZqYbUrp2zVjnTM$",
+                "variable_workflow_01FGYY44G3TK951Crpnd8g2izonyM4bFtpW": "$global.variable_01FWYK9T5GX1E4yrobIXcHqttD01BtOWBQQ.global.variable_01FWYK9T5GX1E4yrobIXcHqttD01BtOWBQQ$",
+                "variable_workflow_01FGYY44G3UPV3heGGc3vXCV47YL5WoI2X6": "",
+                "variable_workflow_01FGYZ9BV4QTP19CuMwcW8QywvCP9ymx2BZ": "Description: $activity.definition_activity_01JLPO3YQ0IFK0hnURYYZO4gWok7jTmjPxc.output.script_queries.description$"
+              },
+              "runtime_user": {
+                "target_default": true
+              },
+              "skip_execution": false,
+              "target": {
+                "override_workflow_target_group_criteria": true,
+                "target_group": {
+                  "run_on_all_targets": false,
+                  "use_criteria": {
+                    "choose_target_using_algorithm": "choose_first_with_matching_criteria",
+                    "conditions": [
+                      {
+                        "left_operand": "$targetgroup.web-service endpoint.input.display_name$",
+                        "operator": "eq",
+                        "right_operand": "Webex_Teams_Target"
+                      }
+                    ]
+                  }
+                }
+              },
+              "workflow_id": "definition_workflow_01FGYY44YU521254ygN3Le0In0kEHpiPNpf"
+            },
+            "object_type": "definition_activity"
+          },
+          {
+            "unique_name": "definition_activity_01JKZF42MCTUI7KeZlz7bNtFrlGp4OJNQEP",
+            "name": "Service Now - Create Incident",
+            "title": "Service Now - Create Incident",
+            "type": "workflow.atomic_workflow",
+            "base_type": "subworkflow",
+            "properties": {
+              "continue_on_failure": false,
+              "display_name": "Service Now - Create Incident",
+              "input": {
+                "variable_workflow_01C0CK2MY2SLG1FXph6ZHp7iHmRw1KvUFlN": "Cisco Threat Response Incident: $activity.definition_activity_01GFAUMH08XDR42Z8EukP0mX6w8RF9PppPC.input.source_array[@].title$",
+                "variable_workflow_01FGYF0DUR8HV2TMpEKctsYjQR4mzjD5OTu": "Cisco Threat Response Incident has been responded to by SecureX orchestration. See the work notes for more details.",
+                "variable_workflow_01FGYGCZL5M2E1m1O5tvVVn0DVzVTLwytei": 2,
+                "variable_workflow_01FGYGPFJYM4L5aVpzNOhRwMmzKJDofqufe": 2,
+                "variable_workflow_01FGYGZ0OYYNM5pWjyyreMjNHDjusjNe8jx": "[code]\u003cbr\u003eCTR Incident Details:\u003c/br\u003e\n\u003cbr\u003eTitle: $activity.definition_activity_01GFAUMH08XDR42Z8EukP0mX6w8RF9PppPC.input.source_array[@].title$\u003c/br\u003e\n\u003cbr\u003eShort Description: $activity.definition_activity_01GFAUMH08XDR42Z8EukP0mX6w8RF9PppPC.input.source_array[@].short_description$\u003c/br\u003e\n\u003cbr\u003eDescription: \u003c/br\u003e\u003cbr\u003e$activity.definition_activity_01JLO6DXLSD6B0qpikHApmzmQChSXvdBl6l.output.script_queries.description$\u003c/br\u003e\n\u003cbr\u003e\u003ca href=\"https://visibility.amp.cisco.com/investigate?iid=$activity.definition_activity_01GFAUMH08XDR42Z8EukP0mX6w8RF9PppPC.input.source_array[@].id$\"\u003eInvestigate Incident in SecureX Threat Response\u003c/a\u003e\u003c/br\u003e[/code]",
+                "variable_workflow_01FGYI8HES41K63G3UzMinBH3iApm37fBGt": "admin",
+                "variable_workflow_01FMQD0HIJIDU5kce0VNx4HQiMYjMfUvBlj": "v2"
+              },
+              "runtime_user": {
+                "target_default": true
+              },
+              "skip_execution": false,
+              "target": {
+                "override_workflow_target_group_criteria": true,
+                "target_group": {
+                  "run_on_all_targets": false,
+                  "use_criteria": {
+                    "choose_target_using_algorithm": "choose_first_with_matching_criteria",
+                    "conditions": [
+                      {
+                        "left_operand": "$targetgroup.web-service endpoint.input.display_name$",
+                        "operator": "eq",
+                        "right_operand": "ServiceNow"
+                      }
+                    ]
+                  }
+                }
+              },
+              "workflow_id": "definition_workflow_01C0BYD0GI1KZ0mxScCSxVrfX70zrUdqLlW"
+            },
+            "object_type": "definition_activity"
+          },
+          {
+            "unique_name": "definition_activity_01GWPO9V8BX8M0Q6drmf79DAkZscvBLbqo6",
+            "name": "Sleep",
+            "title": "Sleep",
+            "type": "core.sleep",
+            "base_type": "activity",
+            "properties": {
+              "continue_on_failure": false,
+              "display_name": "Sleep",
+              "skip_execution": false,
+              "sleep_interval": 1
+            },
+            "object_type": "definition_activity"
+          }
+        ]
+      }
+    ],
+    "categories": [
+      "category_01J83CPPCCJIN5FAu0MdLu75KUwXUCB9fhW"
+    ]
+  },
+  "categories": {
+    "category_01J83CPPCCJIN5FAu0MdLu75KUwXUCB9fhW": {
+      "unique_name": "category_01J83CPPCCJIN5FAu0MdLu75KUwXUCB9fhW",
+      "name": "Cisco PoV",
+      "title": "Cisco PoV",
+      "type": "basic.category",
+      "base_type": "category",
+      "description": "Created by Cisco for PoV",
+      "category_type": "custom",
+      "object_type": "category"
+    }
+  },
+  "target_groups": {
+    "target_group_01EJ0TQWPQWBD0qiWqClJKj9FOzwiZRfOFH": {
+      "unique_name": "target_group_01EJ0TQWPQWBD0qiWqClJKj9FOzwiZRfOFH",
+      "name": "Default TargetGroup",
+      "title": "Default TargetGroup",
+      "type": "generic.target_group",
+      "base_type": "target_group",
+      "version": "1.0.0",
+      "targets": [
+        {
+          "data_target_type": "web-service.endpoint",
+          "view_target_type": "web-service.endpoint",
+          "include_all_targets": true
+        },
+        {
+          "data_target_type": "email.smtp_endpoint",
+          "view_target_type": "email.smtp_endpoint",
+          "include_all_targets": true
+        }
+      ],
+      "object_type": "target_group"
+    }
+  },
+  "variables": {
+    "variable_01FWYK9T5GX1E4yrobIXcHqttD01BtOWBQQ": {
+      "unique_name": "variable_01FWYK9T5GX1E4yrobIXcHqttD01BtOWBQQ",
+      "properties": {
+        "value": "Y2lzY29zcGFyazovL3VzL1JPT00vYWIxZWRiYzAtYWE4NS0xMWVhLTllNjYtMWQyNWJiODAwMWZk",
+        "scope": "global",
+        "name": "Webex Teams Room",
+        "type": "datatype.string",
+        "is_required": false,
+        "is_invisible": false
+      },
+      "object_type": "variable"
+    },
+    "variable_01GF8HX6FEB7E1CS6XHyodxpGimJDKt2fSC": {
+      "unique_name": "variable_01GF8HX6FEB7E1CS6XHyodxpGimJDKt2fSC",
+      "properties": {
+        "value": "2020-11-12T18:38:13.13Z",
+        "scope": "global",
+        "name": "Last Run Timestamp",
+        "type": "datatype.string",
+        "description": "This is the timestamp for when the last time Cisco Threat Response Incidents have been pulled.",
+        "is_required": false,
+        "is_invisible": false
+      },
+      "object_type": "variable"
+    },
+    "variable_01H0BNK7MLU3M6Bcnlz5qZqYbUrp2zVjnTM": {
+      "unique_name": "variable_01H0BNK7MLU3M6Bcnlz5qZqYbUrp2zVjnTM",
+      "properties": {
+        "value": "*****",
+        "scope": "global",
+        "name": "Webex Teams Bot Token",
+        "type": "datatype.secure_string",
+        "is_required": false,
+        "is_invisible": false
+      },
+      "object_type": "variable"
+    }
+  },
+  "atomic_workflows": [
+    "definition_workflow_01FGYY44YU521254ygN3Le0In0kEHpiPNpf",
+    "definition_workflow_01C0BYD0GI1KZ0mxScCSxVrfX70zrUdqLlW",
+    "definition_workflow_01779LB6MV0P02kvka9TGV5cEam84NrCTy4"
+  ]
+}
