@@ -26,9 +26,9 @@ This SecureX orchestration workflow looks for SecureX Threat Response new incide
 ### Step 1. Browse to your SecureX orchestration instance
 
 The URL will be a different depending on the region your account is in:
-US: https://securex-ao.us.security.cisco.com/orch-ui/workflows/
-EU: https://securex-ao.eu.security.cisco.com/orch-ui/workflows/
-APJC: https://securex-ao.apjc.security.cisco.com/orch-ui/workflows/
+- US: https://securex-ao.us.security.cisco.com/orch-ui/workflows/
+- EU: https://securex-ao.eu.security.cisco.com/orch-ui/workflows/
+- APJC: https://securex-ao.apjc.security.cisco.com/orch-ui/workflows/
 
 ### Step 2. Configure ServiceNow Target and Account Keys
 
