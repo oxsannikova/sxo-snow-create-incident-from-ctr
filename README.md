@@ -2,6 +2,12 @@
 
 This SecureX orchestration workflow looks for SecureX Threat Response new incidents and then creates a ServiceNow incident for any found.
 
+## Features
+
+- Retrieve SecureX threat response new incidents between current time and the last time of this playbook
+- Create Service Now incidents based on description from SecureX incident and a referense link
+- Send Webex Teams message to SecOps space
+
 ## Required Targets
 - CTR_For_Access_Token (default)
 - CTR_API (default)
