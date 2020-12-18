@@ -23,7 +23,7 @@ This SecureX orchestration workflow looks for SecureX Threat Response new incide
 
 ## Setup instructions
 
-### Step 1. Browse to your SecureX orchestration instance.
+### Step 1. Browse to your SecureX orchestration instance
 
 The URL will be a different depending on the region your account is in:
 US: https://securex-ao.us.security.cisco.com/orch-ui/workflows/
@@ -72,7 +72,7 @@ In SecureX orchestration, choose in the menu on the left Variables -> Global Var
 
 ![](/assets/variables.png)
 
-Create new variable of string type with a unique display name (e.g. "Santa Tracking Space"), paste Room ID as a value and click Submit.
+Create new variable of string type with a unique display name (e.g. "SXO Notifications Space"), paste Room ID as a value and click Submit.
 
 ![](/assets/new_variable.png)
 
