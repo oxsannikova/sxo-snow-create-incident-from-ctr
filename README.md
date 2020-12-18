@@ -23,15 +23,28 @@ This SecureX orchestration workflow looks for SecureX Threat Response new incide
 
 ## Setup instructions
 
-### Step 1. Configure ServiceNow Target
+### Step 1. Browse to your SecureX orchestration instance.
 
-> Note: We have used free [developer ServiceNow instance](https://developer.servicenow.com/dev.do) to test this orchestration workflow.
+The URL will be a different depending on the region your account is in:
+US: https://securex-ao.us.security.cisco.com/orch-ui/workflows/
+EU: https://securex-ao.eu.security.cisco.com/orch-ui/workflows/
+APJC: https://securex-ao.apjc.security.cisco.com/orch-ui/workflows/
 
-In SecureX Orchestration, go to **Targets** in the left hand side menu, select **New Target**, and apply configuration according to the screenshot below.
+### Step 2. Configure ServiceNow Target and Account Keys
 
-> Note: CTR_API and CTR_For_Access_Token are the stardard targets that are pre-configured in SecureX orchestration out of the box.
+> **Note:** We have used free [developer ServiceNow instance](https://developer.servicenow.com/dev.do) to test this orchestration workflow.
 
-### Step 2. Set up Webex Teams Target
+In SecureX Orchestration, go to **Targets** section in the left hand side menu, select **New Target**, choose **HTTP Endpoint** target type and apply configuration according to the screenshot below.
+
+![](/assets/snow_target.png)
+
+> **Note:** **CTR_API** and **CTR_For_Access_Token** are the standard targets that are pre-configured in SecureX orchestration out of the box.
+
+Go to **Account Keys** section in the left hand side menu, select **New Account Key**, choose **HTTP Basic Authentication** account key type and configure the key according to the screenshot below.
+
+![](/assets/snow_account_keys.png)
+
+### Step 3. Set up Webex Teams Target
 
 In order to send notifications via Webex Teams, the target needs to be configured to reach it's API. In SecureX Orchestration, go to Targets in the left hand side menu, select New Target, and apply configuration according to the screenshot below.
 
@@ -39,7 +52,7 @@ In order to send notifications via Webex Teams, the target needs to be configure
 
 ![](/assets/webex_teams_target.png)
 
-### Step 3. Create Webex Teams Room for notifications
+### Step 4. Create Webex Teams Room for notifications
 
 > It is assumed that Webex Teams Room for notifications will be created in advance (see prerequisites section).
 
@@ -63,7 +76,7 @@ Create new variable of string type with a unique display name (e.g. "Santa Track
 
 ![](/assets/new_variable.png)
 
-### Step 4. Obtain Webex Teams API Token
+### Step 5. Obtain Webex Teams API Token
 
 In order to send the Webex Teams messages, you have two options:
   - **Option 1 (For tests only):** Use your own Webex Teams API token that will need to be updated manually every 12 hours.
@@ -72,13 +85,13 @@ In order to send the Webex Teams messages, you have two options:
       - Record its API Token
       - Add Bot to the Webex Teams Room so that it can send notifications.
 
-### Step 5. Import Atomic Workflows
+### Step 6. Import Atomic Workflows
 
 SXO workflow is represented by the file in JSON format, that contains definitions and description of all the activities, targets, variables and atomic workflows that are in use. In SecureX orchestration left hand-side menu, go to Workflows -> Atomic Actions -> Import -> Browse and import the atomic workflows.
 
-https://ciscosecurity.github.io/sxo-05-security-workflows/importing
+> **Note:** Refer to documentation for more information about workflow import options: https://ciscosecurity.github.io/sxo-05-security-workflows/importing
 
-### Step 6. Import the main workflow
+### Step 7. Import the main workflow
 
 In SecureX orchestration left hand-side menu, go to Workflows -> My Workflows -> Import -> Browse and import the workflow called __sxo-santa-tracker-workflow__.
 
@@ -100,7 +113,7 @@ Copy your personal Webex API Token or your Bots' API Token into the VALUE field.
 
 ![](/assets/inside_workflow.png)
 
-## Step 7. Run the workflow
+## Step 8. Run the workflow
 
 1. To execute the workflow, click RUN at the right top corner in the action pane.
 
@@ -113,3 +126,9 @@ Copy your personal Webex API Token or your Bots' API Token into the VALUE field.
 3. Once execution is complete, examine the Webex Teams Room and Email Inbox for notifications and check if Threat Response Casebook has been created/updated in SecureX Ribbon.
 
 > You can return to previous runs information by clicking `VIEW RUNS` inside the workflow or going to __Runs__ in the left hand-side menu.
+
+## Notes
+Please test this properly before implementing in a production environment. This is a sample workflow!
+
+## Author(s)
+Oxana Sannikova (Cisco)
