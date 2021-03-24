@@ -1,4 +1,4 @@
-# SecureX orchestrtration workflow: Create ServiceNow incident from SecureX threat response insident
+# SecureX orchestration workflow: Create ServiceNow incident from SecureX threat response insident
 
 This SecureX orchestration workflow looks for SecureX Threat Response new incidents and then creates a ServiceNow incident for any found.
 
