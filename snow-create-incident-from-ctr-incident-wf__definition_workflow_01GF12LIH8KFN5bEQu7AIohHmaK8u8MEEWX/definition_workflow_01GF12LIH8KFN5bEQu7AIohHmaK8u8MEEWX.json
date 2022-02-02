@@ -42,14 +42,14 @@
     "object_type": "definition_workflow",
     "actions": [
       {
-        "unique_name": "definition_activity_01GF13N0KW05B17IKmVMaikwPPjEZFf3jKw",
-        "name": "CTRGenerateAccessToken",
-        "title": "CTRGenerateAccessToken",
+        "unique_name": "definition_activity_01UOW3PQVV7WL6wdK0NzSImH7A1tDgbPgiO",
+        "name": "Threat Response - Generate Access Token",
+        "title": "Threat Response - Generate Access Token",
         "type": "workflow.atomic_workflow",
         "base_type": "subworkflow",
         "properties": {
           "continue_on_failure": false,
-          "display_name": "CTRGenerateAccessToken",
+          "display_name": "Threat Response - Generate Access Token",
           "runtime_user": {
             "target_default": true
           },
@@ -70,7 +70,7 @@
               }
             }
           },
-          "workflow_id": "definition_workflow_01779LB6MV0P02kvka9TGV5cEam84NrCTy4"
+          "workflow_id": "definition_workflow_01PP75S3LTBW4420OZU3rdHWKHFnE6aC7yH"
         },
         "object_type": "definition_activity"
       },
@@ -128,7 +128,7 @@
           "custom_headers": [
             {
               "name": "Authorization",
-              "value": "Bearer $activity.definition_activity_01GF13N0KW05B17IKmVMaikwPPjEZFf3jKw.output.variable_workflow_01BNOOXA3G6MV1PGAvsfZOKDdMYcE6XS726$"
+              "value": "Bearer $activity.definition_activity_01UOW3PQVV7WL6wdK0NzSImH7A1tDgbPgiO.output.variable_workflow_01PP75S3G7CJY6WAQr2IJC7qga2SIoE09gQ$"
             }
           ],
           "description": "Get the incidents sorted by the time opened within the timeframe between the last request and the  current time.",
@@ -557,7 +557,7 @@
   },
   "atomic_workflows": [
     "definition_workflow_01FGYY44YU521254ygN3Le0In0kEHpiPNpf",
-    "definition_workflow_01C0BYD0GI1KZ0mxScCSxVrfX70zrUdqLlW",
-    "definition_workflow_01779LB6MV0P02kvka9TGV5cEam84NrCTy4"
+    "definition_workflow_01PP75S3LTBW4420OZU3rdHWKHFnE6aC7yH",
+    "definition_workflow_01C0BYD0GI1KZ0mxScCSxVrfX70zrUdqLlW"
   ]
 }
